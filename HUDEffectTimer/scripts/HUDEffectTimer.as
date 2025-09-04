@@ -28,12 +28,6 @@ package
       
       private static const TITLE_HUDMENU:String = "HUDMenu";
       
-      private static const DEFAULT_STACK_WIDTH:Number = 19;
-      
-      private static const STACK_WITH_PADDING:Number = 12;
-      
-      private static const STACK_SHADOW_AMOUNT:Number = 1;
-      
       private static const ICON_BULLET_STORM:int = 47;
       
       private static const ICON_ADRENALINE:int = 48;
@@ -101,7 +95,6 @@ package
          {
             this.adrenalineTimer.removeEventListener(TimerEvent.TIMER,this.adrenalineTimerTick);
          }
-         adrenalineTimer;
       }
       
       public function get elapsedTime() : Number
@@ -111,7 +104,6 @@ package
       
       public function init() : void
       {
-         setTimeout(ShowHUDMessage,5000,"Mod loaded!");
          this.timer_tf = new TextField();
          this.addChild(this.timer_tf);
          this.getActiveEffectsWidget();
@@ -129,11 +121,11 @@ package
       
       public function initTimer() : void
       {
+         this.adrenalineTimer = new Timer(1000,30);
+         this.adrenalineTimer.addEventListener(TimerEvent.TIMER,this.adrenalineTimerTick,false,0,true);
          this.timer = new Timer(20);
          this.timer.addEventListener(TimerEvent.TIMER,this.displayEffectTimes,false,0,true);
          this.timer.start();
-         this.adrenalineTimer = new Timer(1000,30);
-         this.adrenalineTimer.addEventListener(TimerEvent.TIMER,this.adrenalineTimerTick,false,0,true);
       }
       
       public function adrenalineTimerTick() : void
@@ -157,56 +149,67 @@ package
       
       public function displayEffectTimes() : void
       {
-         var t1:Number = Number(getTimer());
-         if(!this.activeEffects)
+         var t1:Number;
+         var hasAdrenaline:Boolean;
+         var i:int;
+         var effect:Object;
+         var globalPos:Point;
+         try
          {
-            return;
-         }
-         var hasAdrenaline:Boolean = false;
-         var i:int = 0;
-         while(i < this.activeEffects.numChildren)
-         {
-            var effect:Object = this.activeEffects.getChildAt(i);
-            if(effect.visible)
+            t1 = Number(getTimer());
+            if(!this.activeEffects)
             {
-               if(effect.getChildAt(3).currentFrame == ICON_ADRENALINE)
-               {
-                  hasAdrenaline = true;
-                  if(this.lastAdrenalineStack != effect.StackAmount && effect.StackAmount > 0)
-                  {
-                     this.resetAdrenalineTimer();
-                     this.lastAdrenalineStack = effect.StackAmount;
-                  }
-                  Stack_mc = effect.Stack_mc;
-                  if(this.textFormat == null)
-                  {
-                     this.textFormat = Stack_mc.StackAmount_tf.getTextFormat();
-                     this.textFormat.bold = true;
-                     TextFieldEx.setTextAutoSize(this.timer_tf,TextFieldEx.TEXTAUTOSZ_SHRINK);
-                     this.timer_tf.defaultTextFormat = this.textFormat;
-                     this.timer_tf.setTextFormat(this.textFormat);
-                     this.timer_tf.background = true;
-                     this.timer_tf.backgroundColor = 16777163;
-                     this.timer_tf.border = true;
-                     this.timer_tf.borderColor = 0;
-                  }
-                  var globalPos:Point = Stack_mc.BG_mc.localToGlobal(ZERO_POINT);
-                  this.timer_tf.x = globalPos.x;
-                  this.timer_tf.height = Stack_mc.BG_mc.height * 1.1;
-                  this.timer_tf.y = globalPos.y - this.timer_tf.height;
-                  this.timer_tf.text = this.adrenalineTime || "0";
-                  this.timer_tf.width = Stack_mc.BG_mc.width * (Stack_mc.StackAmount_tf.length == 1 ? (this.timer_tf.text.length == 1 ? 1 : 1.4) : 1);
-                  this.timer_tf.scaleX = this.HUDActiveEffectsWidget_mc.scaleX;
-                  this.timer_tf.scaleY = this.HUDActiveEffectsWidget_mc.scaleY;
-                  this.filters = effect.filters;
-               }
+               return;
             }
-            i++;
+            hasAdrenaline = false;
+            i = 0;
+            while(i < this.activeEffects.numChildren)
+            {
+               effect = this.activeEffects.getChildAt(i);
+               if(effect.visible)
+               {
+                  if(effect.getChildAt(3).currentFrame == ICON_ADRENALINE)
+                  {
+                     hasAdrenaline = true;
+                     if(this.lastAdrenalineStack != effect.StackAmount && effect.StackAmount > 0)
+                     {
+                        this.resetAdrenalineTimer();
+                        this.lastAdrenalineStack = effect.StackAmount;
+                     }
+                     Stack_mc = effect.Stack_mc;
+                     if(this.textFormat == null)
+                     {
+                        this.textFormat = Stack_mc.StackAmount_tf.getTextFormat();
+                        this.textFormat.bold = true;
+                        TextFieldEx.setTextAutoSize(this.timer_tf,TextFieldEx.TEXTAUTOSZ_SHRINK);
+                        this.timer_tf.defaultTextFormat = this.textFormat;
+                        this.timer_tf.setTextFormat(this.textFormat);
+                        this.timer_tf.background = true;
+                        this.timer_tf.backgroundColor = 16777163;
+                        this.timer_tf.border = true;
+                        this.timer_tf.borderColor = 0;
+                     }
+                     globalPos = Stack_mc.BG_mc.localToGlobal(ZERO_POINT);
+                     this.timer_tf.x = globalPos.x;
+                     this.timer_tf.height = Stack_mc.BG_mc.height * 1.1;
+                     this.timer_tf.y = globalPos.y - this.timer_tf.height;
+                     this.timer_tf.text = this.adrenalineTime || "0";
+                     this.timer_tf.width = Stack_mc.BG_mc.width * (Stack_mc.StackAmount_tf.length == 1 ? (this.timer_tf.text.length == 1 ? 1 : 1.4) : 1);
+                     this.timer_tf.scaleX = this.HUDActiveEffectsWidget_mc.scaleX;
+                     this.timer_tf.scaleY = this.HUDActiveEffectsWidget_mc.scaleY;
+                     this.filters = effect.filters;
+                  }
+               }
+               i++;
+            }
+            this.timer_tf.visible = hasAdrenaline && Boolean(this.topLevel.RightMeters_mc.visible) && this.HUDActiveEffectsWidget_mc.visible;
+            if(!hasAdrenaline)
+            {
+               this.stopAdrenalineTimer();
+            }
          }
-         this.timer_tf.visible = hasAdrenaline && Boolean(this.topLevel.RightMeters_mc.visible) && this.HUDActiveEffectsWidget_mc.visible;
-         if(!hasAdrenaline)
+         catch(e:*)
          {
-            this.stopAdrenalineTimer();
          }
       }
    }
