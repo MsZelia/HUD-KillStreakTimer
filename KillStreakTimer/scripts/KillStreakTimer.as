@@ -17,10 +17,10 @@ package
    import flash.utils.*;
    import scaleform.gfx.*;
    
-   public class HUDEffectTimer extends MovieClip
+   public class KillStreakTimer extends MovieClip
    {
       
-      public static const MOD_NAME:String = "HUDEffectTimer";
+      public static const MOD_NAME:String = "KillStreakTimer";
       
       public static const MOD_VERSION:String = "1.0.0";
       
@@ -28,11 +28,7 @@ package
       
       private static const TITLE_HUDMENU:String = "HUDMenu";
       
-      private static const ICON_BULLET_STORM:int = 47;
-      
       private static const ICON_ADRENALINE:int = 48;
-      
-      private static const ICON_ONSLAUGHT:int = 69;
       
       private static const ZERO_POINT:Point = new Point(0,0);
       
@@ -54,7 +50,9 @@ package
       
       private var adrenalineTime:int = 0;
       
-      public function HUDEffectTimer()
+      private var lastRenderTime:Number = 0;
+      
+      public function KillStreakTimer()
       {
          super();
          addEventListener(Event.ADDED_TO_STAGE,this.addedToStageHandler,false,0,true);
@@ -208,6 +206,7 @@ package
             {
                this.stopAdrenalineTimer();
             }
+            this.lastRenderTime = getTimer() - t1;
          }
          catch(e:*)
          {
