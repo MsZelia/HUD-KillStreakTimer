@@ -17,10 +17,10 @@ package
    import flash.utils.*;
    import scaleform.gfx.*;
    
-   public class HUDEffectTimers extends MovieClip
+   public class HUDEffectTimer extends MovieClip
    {
       
-      public static const MOD_NAME:String = "HUDEffectTimers";
+      public static const MOD_NAME:String = "HUDEffectTimer";
       
       public static const MOD_VERSION:String = "1.0.0";
       
@@ -60,7 +60,7 @@ package
       
       private var adrenalineTime:int = 0;
       
-      public function HUDEffectTimers()
+      public function HUDEffectTimer()
       {
          super();
          addEventListener(Event.ADDED_TO_STAGE,this.addedToStageHandler,false,0,true);
@@ -196,14 +196,14 @@ package
                   this.timer_tf.y = globalPos.y - this.timer_tf.height;
                   this.timer_tf.text = this.adrenalineTime || "0";
                   this.timer_tf.width = Stack_mc.BG_mc.width * (this.timer_tf.text.length == 1 ? 1 : 1.4);
-                  this.timer_tf.scaleX = Stack_mc.scaleX;
-                  this.timer_tf.scaleY = Stack_mc.scaleY;
+                  this.timer_tf.scaleX = this.HUDActiveEffectsWidget_mc.scaleX;
+                  this.timer_tf.scaleY = this.HUDActiveEffectsWidget_mc.scaleY;
                   this.filters = effect.filters;
                }
             }
             i++;
          }
-         this.timer_tf.visible = hasAdrenaline;
+         this.timer_tf.visible = hasAdrenaline && Boolean(this.topLevel.RightMeters_mc.visible) && this.HUDActiveEffectsWidget_mc.visible;
          if(!hasAdrenaline)
          {
             this.stopAdrenalineTimer();
