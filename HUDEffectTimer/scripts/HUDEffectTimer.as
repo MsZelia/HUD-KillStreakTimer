@@ -195,7 +195,7 @@ package
                   this.timer_tf.height = Stack_mc.BG_mc.height * 1.1;
                   this.timer_tf.y = globalPos.y - this.timer_tf.height;
                   this.timer_tf.text = this.adrenalineTime || "0";
-                  this.timer_tf.width = Stack_mc.BG_mc.width * (this.timer_tf.text.length == 1 ? 1 : 1.4);
+                  this.timer_tf.width = Stack_mc.BG_mc.width * (Stack_mc.StackAmount_tf.length == 1 ? (this.timer_tf.text.length == 1 ? 1 : 1.4) : 1);
                   this.timer_tf.scaleX = this.HUDActiveEffectsWidget_mc.scaleX;
                   this.timer_tf.scaleY = this.HUDActiveEffectsWidget_mc.scaleY;
                   this.filters = effect.filters;
