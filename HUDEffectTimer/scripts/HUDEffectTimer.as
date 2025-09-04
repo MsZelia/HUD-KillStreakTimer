@@ -198,6 +198,7 @@ package
                      this.timer_tf.scaleX = this.HUDActiveEffectsWidget_mc.scaleX;
                      this.timer_tf.scaleY = this.HUDActiveEffectsWidget_mc.scaleY;
                      this.filters = effect.filters;
+                     break;
                   }
                }
                i++;
