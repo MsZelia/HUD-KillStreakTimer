@@ -22,13 +22,13 @@ package
       
       public static const MOD_NAME:String = "KillStreakTimer";
       
-      public static const MOD_VERSION:String = "1.0.0";
+      public static const MOD_VERSION:String = "1.0.1";
       
       public static const FULL_MOD_NAME:String = MOD_NAME + " " + MOD_VERSION;
       
       private static const TITLE_HUDMENU:String = "HUDMenu";
       
-      private static const ICON_ADRENALINE:int = 48;
+      private static const ICON_ADRENALINE:int = 49;
       
       private static const ZERO_POINT:Point = new Point(0,0);
       
@@ -166,7 +166,7 @@ package
                effect = this.activeEffects.getChildAt(i);
                if(effect.visible)
                {
-                  if(effect.getChildAt(3).currentFrame == ICON_ADRENALINE)
+                  if(effect.Icon_mc.currentFrame == ICON_ADRENALINE)
                   {
                      hasAdrenaline = true;
                      if(this.lastAdrenalineStack != effect.StackAmount && effect.StackAmount > 0)
