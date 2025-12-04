@@ -22,17 +22,23 @@ package
       
       public static const MOD_NAME:String = "KillStreakTimer";
       
-      public static const MOD_VERSION:String = "1.0.1";
+      public static const MOD_VERSION:String = "1.0.2";
       
       public static const FULL_MOD_NAME:String = MOD_NAME + " " + MOD_VERSION;
       
       private static const TITLE_HUDMENU:String = "HUDMenu";
       
-      private static const ICON_ADRENALINE:int = 49;
+      private static const ICON_ADRENALINE:String = "AdrenalineIcon";
+      
+      private static const ADRENALINE_DURATION:int = 30;
       
       private static const ZERO_POINT:Point = new Point(0,0);
       
+      private static const DEBUG:Boolean = false;
+      
       private var topLevel:* = null;
+      
+      private var HUDRightMetersData:*;
       
       private var HUDActiveEffectsWidget_mc:MovieClip = null;
       
@@ -46,7 +52,7 @@ package
       
       private var adrenalineTimer:Timer;
       
-      private var lastAdrenalineStack:int = 0;
+      private var lastAdrenalineStack:int = -1;
       
       private var adrenalineTime:int = 0;
       
@@ -68,6 +74,14 @@ package
          GlobalFunc.ShowHUDMessage("[" + FULL_MOD_NAME + "] " + param1);
       }
       
+      public function displayError(errorString:String) : void
+      {
+         if(DEBUG)
+         {
+            stage.dispatchEvent(new HUDModError(errorString));
+         }
+      }
+      
       public function addedToStageHandler(param1:Event) : *
       {
          removeEventListener(Event.ADDED_TO_STAGE,this.addedToStageHandler);
@@ -77,6 +91,7 @@ package
          {
             if(getQualifiedClassName(this.topLevel) == TITLE_HUDMENU)
             {
+               this.HUDRightMetersData = BSUIDataManager.GetDataFromClient("HUDRightMetersData");
                this.init();
             }
          }
@@ -108,6 +123,24 @@ package
          this.initTimer();
       }
       
+      public function get adrenalineStack() : int
+      {
+         var i:int = 0;
+         if(this.HUDRightMetersData.data && this.HUDRightMetersData.data.activeEffects && this.HUDRightMetersData.data.activeEffects.length)
+         {
+            var effects:Array = this.HUDRightMetersData.data.activeEffects;
+            while(i < effects.length)
+            {
+               if(effects[i].iconID == ICON_ADRENALINE)
+               {
+                  return effects[i].stackAmount;
+               }
+               i++;
+            }
+         }
+         return -1;
+      }
+      
       public function getActiveEffectsWidget() : void
       {
          if(this.topLevel && this.topLevel.RightMeters_mc && this.topLevel.RightMeters_mc.HUDActiveEffectsWidget_mc && this.topLevel.RightMeters_mc.HUDActiveEffectsWidget_mc.numChildren > 1)
@@ -119,7 +152,7 @@ package
       
       public function initTimer() : void
       {
-         this.adrenalineTimer = new Timer(1000,30);
+         this.adrenalineTimer = new Timer(1000,ADRENALINE_DURATION);
          this.adrenalineTimer.addEventListener(TimerEvent.TIMER,this.adrenalineTimerTick,false,0,true);
          this.timer = new Timer(20);
          this.timer.addEventListener(TimerEvent.TIMER,this.displayEffectTimes,false,0,true);
@@ -133,15 +166,19 @@ package
       
       public function resetAdrenalineTimer() : void
       {
-         this.adrenalineTime = 30;
+         this.adrenalineTime = ADRENALINE_DURATION;
          this.adrenalineTimer.reset();
          this.adrenalineTimer.start();
+         this.displayError(toString(this.HUDRightMetersData.data.activeEffects));
       }
       
       public function stopAdrenalineTimer() : void
       {
-         this.lastAdrenalineStack = -1;
-         this.adrenalineTime = 30;
+         if(this.lastAdrenalineStack != -1)
+         {
+            this.displayError("KillStreak (" + this.lastAdrenalineStack + ") stopped!");
+            this.lastAdrenalineStack = -1;
+         }
          this.adrenalineTimer.stop();
       }
       
@@ -152,6 +189,7 @@ package
          var i:int;
          var effect:Object;
          var globalPos:Point;
+         var currentStack:int;
          try
          {
             t1 = Number(getTimer());
@@ -164,15 +202,17 @@ package
             while(i < this.activeEffects.numChildren)
             {
                effect = this.activeEffects.getChildAt(i);
-               if(effect.visible)
+               if(effect && effect.visible)
                {
-                  if(effect.Icon_mc.currentFrame == ICON_ADRENALINE)
+                  if(effect.Icon_mc.currentLabel == ICON_ADRENALINE)
                   {
                      hasAdrenaline = true;
-                     if(this.lastAdrenalineStack != effect.StackAmount && effect.StackAmount > 0)
+                     currentStack = this.adrenalineStack;
+                     if(this.lastAdrenalineStack != currentStack && currentStack > 0)
                      {
+                        this.displayError("KillStreak: " + this.lastAdrenalineStack + " -> " + currentStack);
                         this.resetAdrenalineTimer();
-                        this.lastAdrenalineStack = effect.StackAmount;
+                        this.lastAdrenalineStack = currentStack;
                      }
                      Stack_mc = effect.Stack_mc;
                      if(this.textFormat == null)
